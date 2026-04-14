@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'registration_screen.dart';
-import 'login_screen.dart';
+import 'entry_screen.dart';
 
 class LanguageScreen extends StatelessWidget {
-  /// Pass [savedProfile] when the user has already registered.
-  /// If null, the user will be taken through Registration → Login.
-  /// If set, the user will be taken through Login (camera verify) → Home.
+  /// [savedProfile] is kept for backward compatibility but is no longer used
+  /// for routing — after language selection, all users go to EntryScreen.
   final Map<String, dynamic>? savedProfile;
 
   const LanguageScreen({super.key, this.savedProfile});
@@ -22,10 +20,13 @@ class LanguageScreen extends StatelessWidget {
     ];
 
     return WillPopScope(
-      onWillPop: () async => true, // Allow back navigation
+      onWillPop: () async => true,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Select Language', style: TextStyle(fontWeight: FontWeight.bold)),
+          title: const Text(
+            'Select Language',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
           centerTitle: true,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_rounded),
@@ -52,7 +53,7 @@ class LanguageScreen extends StatelessWidget {
               children: [
                 const SizedBox(height: 20),
                 const Text(
-                  "Please select your preferred language",
+                  'Please select your preferred language',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
@@ -63,7 +64,8 @@ class LanguageScreen extends StatelessWidget {
                 const SizedBox(height: 40),
                 Expanded(
                   child: GridView.builder(
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       crossAxisSpacing: 16,
                       mainAxisSpacing: 16,
@@ -79,32 +81,23 @@ class LanguageScreen extends StatelessWidget {
                           shadowColor: Colors.teal.withOpacity(0.3),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
-                            side: const BorderSide(color: Colors.teal, width: 1.5),
+                            side: const BorderSide(
+                                color: Colors.teal, width: 1.5),
                           ),
-                          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 16, horizontal: 12),
                         ),
                         onPressed: () {
                           final langCode = languages[index]['code']!;
-
-                          if (savedProfile != null) {
-                            // Returning user → Login (camera verify)
-                            final profile = Map<String, dynamic>.from(savedProfile!);
-                            profile['languageCode'] = langCode;
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => LoginScreen(profileData: profile),
-                              ),
-                            );
-                          } else {
-                            // New user → Registration, then will go to Login
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => RegistrationScreen(languageCode: langCode),
-                              ),
-                            );
-                          }
+                          // Always navigate to EntryScreen — it handles
+                          // Login vs Sign Up, carrying the chosen language.
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  EntryScreen(languageCode: langCode),
+                            ),
+                          );
                         },
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -133,23 +126,3 @@ class LanguageScreen extends StatelessWidget {
     );
   }
 }
-
-// ============================================================
-// REQUIRED pubspec.yaml dependencies (add these):
-// ============================================================
-//
-// dependencies:
-//   flutter:
-//     sdk: flutter
-//   camera: ^0.11.0        # for LoginScreen camera
-//   image_picker: ^1.1.2   # for registration photo upload
-//
-// And add to android/app/src/main/AndroidManifest.xml:
-//   <uses-permission android:name="android.permission.CAMERA"/>
-//
-// And to ios/Runner/Info.plist:
-//   <key>NSCameraUsageDescription</key>
-//   <string>Used for face verification login</string>
-//   <key>NSPhotoLibraryUsageDescription</key>
-//   <string>Used for passport photo upload</string>
-// ============================================================

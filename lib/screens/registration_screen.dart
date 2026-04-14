@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
-import 'login_screen.dart';
+import 'camera_verification_screen.dart';
 
 class RegistrationScreen extends StatefulWidget {
   final String languageCode;
@@ -549,11 +549,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       'emergency_address': _emergencyAddressController.text.trim(),
     };
 
-    // Navigate to LoginScreen instead of HomeScreen
+    // Navigate to CameraVerificationScreen after registration
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(
-        builder: (_) => LoginScreen(profileData: profileData),
+        builder: (_) => CameraVerificationScreen(profileData: profileData),
       ),
       (route) => false,
     );
