@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
-import 'home_screen.dart';
+import 'login_screen.dart';
 
 class RegistrationScreen extends StatefulWidget {
   final String languageCode;
@@ -262,7 +262,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       'parent': 'पालक',
       'child': 'मूल',
       'spouse': 'जोडीदार',
-      'sibling': 'भाऊ/बहीण',
+      'sibling': 'भाऊ/बही��',
       'required': 'हे फील्ड आवश्यक आहे.',
       'invalid_email': 'वैध ईमेल पत्ता प्रविष्ट करा.',
       'invalid_phone': 'वैध 10-अंकी फोन नंबर प्रविष्ट करा.',
@@ -549,9 +549,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       'emergency_address': _emergencyAddressController.text.trim(),
     };
 
+    // Navigate to LoginScreen instead of HomeScreen
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (_) => HomeScreen(profileData: profileData)),
+      MaterialPageRoute(
+        builder: (_) => LoginScreen(profileData: profileData),
+      ),
       (route) => false,
     );
   }
@@ -582,331 +585,358 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       lang['other']!,
     ];
 
-    return Scaffold(
-      appBar: AppBar(title: Text(lang['title']!)),
-      body: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // ── PATIENT DETAILS ──────────────────────────────────────────────
-              Text(lang['patient_details']!,
-                  style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.teal)),
-              const SizedBox(height: 16),
-              Card(
-                elevation: 2,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      // Full Name
-                      _buildTextField(
-                        lang['name']!,
-                        _nameController,
-                        validator: (v) =>
-                            _validateRequired(v, lang['required']!),
-                      ),
+    return WillPopScope(
+      onWillPop: () async => true,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            lang['title']!,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_rounded),
+            onPressed: () => Navigator.pop(context),
+          ),
+          backgroundColor: Colors.teal,
+          foregroundColor: Colors.white,
+          elevation: 0,
+        ),
+        body: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // ── PATIENT DETAILS ──────────────────────────────────────────────
+                Text(lang['patient_details']!,
+                    style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.teal)),
+                const SizedBox(height: 16),
+                Card(
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        // Full Name
+                        _buildTextField(
+                          lang['name']!,
+                          _nameController,
+                          validator: (v) =>
+                              _validateRequired(v, lang['required']!),
+                        ),
 
-                      // DOB field + live age chip side-by-side
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            flex: 3,
-                            child: _buildTextField(
-                              lang['dob']!,
-                              _dobController,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.allow(
-                                    RegExp(r'[\d/]')),
-                                LengthLimitingTextInputFormatter(10),
-                                _DobInputFormatter(),
-                              ],
-                              onChanged: (v) => setState(
-                                  () => _calculatedAge = _calculateAge(v)),
-                              validator: (v) => _validateDob(
-                                v,
-                                lang['required']!,
-                                lang['invalid_dob']!,
-                                lang['future_dob']!,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          // Age chip
-                          Expanded(
-                            flex: 2,
-                            child: Padding(
-                              padding: const EdgeInsets.only(bottom: 16.0),
-                              child: Container(
-                                height: 48,
-                                decoration: BoxDecoration(
-                                  color: _calculatedAge != null
-                                      ? Colors.teal.withOpacity(0.08)
-                                      : Colors.grey.shade100,
-                                  border: Border.all(
-                                    color: _calculatedAge != null
-                                        ? Colors.teal
-                                        : Colors.grey.shade400,
-                                  ),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                alignment: Alignment.center,
-                                child: Text(
-                                  _calculatedAge != null
-                                      ? '$_calculatedAge ${lang['years']}'
-                                      : lang['age_label']!,
-                                  style: TextStyle(
-                                    color: _calculatedAge != null
-                                        ? Colors.teal.shade700
-                                        : Colors.grey,
-                                    fontWeight: _calculatedAge != null
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
-                                    fontSize: _calculatedAge != null ? 15 : 11,
-                                  ),
-                                  textAlign: TextAlign.center,
+                        // DOB field + live age chip side-by-side
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              flex: 3,
+                              child: _buildTextField(
+                                lang['dob']!,
+                                _dobController,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.allow(
+                                      RegExp(r'[\d/]')),
+                                  LengthLimitingTextInputFormatter(10),
+                                  _DobInputFormatter(),
+                                ],
+                                onChanged: (v) => setState(
+                                    () => _calculatedAge = _calculateAge(v)),
+                                validator: (v) => _validateDob(
+                                  v,
+                                  lang['required']!,
+                                  lang['invalid_dob']!,
+                                  lang['future_dob']!,
                                 ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-
-                      // Gender + Blood Group
-                      Row(children: [
-                        Expanded(
-                          child: _buildDropdown(
-                            lang['gender']!,
-                            genderOptions,
-                            _selectedGender,
-                            (v) => setState(() => _selectedGender = v),
-                            required: true,
-                            requiredError: lang['select_required'],
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: _buildDropdown(
-                            lang['blood_group']!,
-                            ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'],
-                            _selectedBloodGroup,
-                            (v) => setState(() => _selectedBloodGroup = v),
-                            required: true,
-                            requiredError: lang['select_required'],
-                          ),
-                        ),
-                      ]),
-
-                      // Email
-                      _buildTextField(
-                        lang['email']!,
-                        _emailController,
-                        type: TextInputType.emailAddress,
-                        validator: (v) => _validateEmail(
-                            v, lang['required']!, lang['invalid_email']!),
-                      ),
-
-                      // Phone
-                      _buildTextField(
-                        lang['phone']!,
-                        _phoneController,
-                        type: TextInputType.phone,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(
-                              RegExp(r'[\d\+\-\s]')),
-                        ],
-                        validator: (v) => _validatePhone(
-                            v, lang['required']!, lang['invalid_phone']!),
-                      ),
-
-                      // Address
-                      _buildTextField(
-                        lang['address']!,
-                        _addressController,
-                        validator: (v) =>
-                            _validateRequired(v, lang['required']!),
-                      ),
-
-                      // ── PHOTO UPLOAD ─────────────────────────────────────────
-                      const SizedBox(height: 8),
-                      GestureDetector(
-                        onTap: _pickPhoto,
-                        child: Container(
-                          height: 150,
-                          decoration: BoxDecoration(
-                            color: Colors.teal.withOpacity(0.07),
-                            border: Border.all(
-                              color: _photoError != null
-                                  ? Colors.red
-                                  : Colors.teal,
-                              width: 2,
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: _uploadedPhoto != null
-                              ? Stack(
-                                  fit: StackFit.expand,
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(10),
-                                      child: Image.file(_uploadedPhoto!,
-                                          fit: BoxFit.cover),
+                            const SizedBox(width: 12),
+                            // Age chip
+                            Expanded(
+                              flex: 2,
+                              child: Padding(
+                                padding: const EdgeInsets.only(bottom: 16.0),
+                                child: Container(
+                                  height: 48,
+                                  decoration: BoxDecoration(
+                                    color: _calculatedAge != null
+                                        ? Colors.teal.withOpacity(0.08)
+                                        : Colors.grey.shade100,
+                                    border: Border.all(
+                                      color: _calculatedAge != null
+                                          ? Colors.teal
+                                          : Colors.grey.shade400,
                                     ),
-                                    Positioned(
-                                      bottom: 8,
-                                      right: 8,
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 10, vertical: 4),
-                                        decoration: BoxDecoration(
-                                          color: Colors.teal.withOpacity(0.85),
-                                          borderRadius:
-                                              BorderRadius.circular(20),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    _calculatedAge != null
+                                        ? '$_calculatedAge ${lang['years']}'
+                                        : lang['age_label']!,
+                                    style: TextStyle(
+                                      color: _calculatedAge != null
+                                          ? Colors.teal.shade700
+                                          : Colors.grey,
+                                      fontWeight: _calculatedAge != null
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
+                                      fontSize: _calculatedAge != null ? 15 : 11,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        // Gender + Blood Group
+                        Row(children: [
+                          Expanded(
+                            child: _buildDropdown(
+                              lang['gender']!,
+                              genderOptions,
+                              _selectedGender,
+                              (v) => setState(() => _selectedGender = v),
+                              required: true,
+                              requiredError: lang['select_required'],
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: _buildDropdown(
+                              lang['blood_group']!,
+                              ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'],
+                              _selectedBloodGroup,
+                              (v) => setState(() => _selectedBloodGroup = v),
+                              required: true,
+                              requiredError: lang['select_required'],
+                            ),
+                          ),
+                        ]),
+
+                        // Email
+                        _buildTextField(
+                          lang['email']!,
+                          _emailController,
+                          type: TextInputType.emailAddress,
+                          validator: (v) => _validateEmail(
+                              v, lang['required']!, lang['invalid_email']!),
+                        ),
+
+                        // Phone
+                        _buildTextField(
+                          lang['phone']!,
+                          _phoneController,
+                          type: TextInputType.phone,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                                RegExp(r'[\d\+\-\s]')),
+                          ],
+                          validator: (v) => _validatePhone(
+                              v, lang['required']!, lang['invalid_phone']!),
+                        ),
+
+                        // Address
+                        _buildTextField(
+                          lang['address']!,
+                          _addressController,
+                          validator: (v) =>
+                              _validateRequired(v, lang['required']!),
+                        ),
+
+                        // ── PHOTO UPLOAD ─────────────────────────────────────────
+                        const SizedBox(height: 8),
+                        GestureDetector(
+                          onTap: _pickPhoto,
+                          child: Container(
+                            height: 150,
+                            decoration: BoxDecoration(
+                              color: Colors.teal.withOpacity(0.07),
+                              border: Border.all(
+                                color: _photoError != null
+                                    ? Colors.red
+                                    : Colors.teal,
+                                width: 2,
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: _uploadedPhoto != null
+                                ? Stack(
+                                    fit: StackFit.expand,
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(10),
+                                        child: Image.file(_uploadedPhoto!,
+                                            fit: BoxFit.cover),
+                                      ),
+                                      Positioned(
+                                        bottom: 8,
+                                        right: 8,
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 10, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: Colors.teal.withOpacity(0.85),
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              const Icon(Icons.edit,
+                                                  size: 12, color: Colors.white),
+                                              const SizedBox(width: 4),
+                                              Text(lang['photo_change']!,
+                                                  style: const TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 12)),
+                                            ],
+                                          ),
                                         ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
+                                      ),
+                                    ],
+                                  )
+                                : Center(
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
                                           children: [
-                                            const Icon(Icons.edit,
-                                                size: 12, color: Colors.white),
-                                            const SizedBox(width: 4),
-                                            Text(lang['photo_change']!,
-                                                style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 12)),
+                                            const Icon(Icons.camera_alt_rounded,
+                                                size: 28, color: Colors.teal),
+                                            const SizedBox(width: 10),
+                                            Icon(Icons.photo_library_rounded,
+                                                size: 28,
+                                                color: Colors.indigo.shade400),
                                           ],
                                         ),
-                                      ),
+                                        const SizedBox(height: 10),
+                                        Text(lang['photo_guide']!,
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.teal)),
+                                        const SizedBox(height: 4),
+                                        Text(lang['photo_hint']!,
+                                            style: const TextStyle(
+                                                fontSize: 12,
+                                                color: Colors.grey)),
+                                      ],
                                     ),
-                                  ],
-                                )
-                              : Center(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          const Icon(Icons.camera_alt_rounded,
-                                              size: 28, color: Colors.teal),
-                                          const SizedBox(width: 10),
-                                          Icon(Icons.photo_library_rounded,
-                                              size: 28,
-                                              color: Colors.indigo.shade400),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 10),
-                                      Text(lang['photo_guide']!,
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.teal)),
-                                      const SizedBox(height: 4),
-                                      Text(lang['photo_hint']!,
-                                          style: const TextStyle(
-                                              fontSize: 12, color: Colors.grey)),
-                                    ],
                                   ),
-                                ),
+                          ),
                         ),
-                      ),
-                      if (_photoError != null) ...[
-                        const SizedBox(height: 6),
-                        Text(_photoError!,
-                            style: const TextStyle(
-                                color: Colors.red, fontSize: 13)),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // ── EMERGENCY CONTACT ─────────────────────────────────────────────
-              Text(lang['emergency_details']!,
-                  style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.redAccent)),
-              const SizedBox(height: 16),
-              Card(
-                elevation: 2,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      _buildTextField(
-                        lang['name']!,
-                        _emergencyNameController,
-                        validator: (v) =>
-                            _validateRequired(v, lang['required']!),
-                      ),
-                      _buildDropdown(
-                        lang['relationship']!,
-                        relationOptions,
-                        _selectedRelationship,
-                        (v) => setState(() => _selectedRelationship = v),
-                        required: true,
-                        requiredError: lang['select_required'],
-                      ),
-                      _buildDropdown(
-                        lang['gender']!,
-                        genderOptions,
-                        _emergencyGender,
-                        (v) => setState(() => _emergencyGender = v),
-                        required: true,
-                        requiredError: lang['select_required'],
-                      ),
-                      _buildTextField(
-                        lang['phone']!,
-                        _emergencyPhoneController,
-                        type: TextInputType.phone,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(
-                              RegExp(r'[\d\+\-\s]')),
+                        if (_photoError != null) ...[
+                          const SizedBox(height: 6),
+                          Text(_photoError!,
+                              style: const TextStyle(
+                                  color: Colors.red, fontSize: 13)),
                         ],
-                        validator: (v) => _validatePhone(
-                            v, lang['required']!, lang['invalid_phone']!),
-                      ),
-                      _buildTextField(
-                        lang['email']!,
-                        _emergencyEmailController,
-                        type: TextInputType.emailAddress,
-                        validator: (v) => _validateEmail(
-                            v, lang['required']!, lang['invalid_email']!),
-                      ),
-                      _buildTextField(
-                        lang['address']!,
-                        _emergencyAddressController,
-                        validator: (v) =>
-                            _validateRequired(v, lang['required']!),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
 
-              const SizedBox(height: 32),
+                const SizedBox(height: 24),
 
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                onPressed: _handleSubmit,
-                child: Text(lang['submit']!,
+                // ── EMERGENCY CONTACT ─────────────────────────────────────────────
+                Text(lang['emergency_details']!,
                     style: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.bold)),
-              ),
-              const SizedBox(height: 40),
-            ],
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.redAccent)),
+                const SizedBox(height: 16),
+                Card(
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        _buildTextField(
+                          lang['name']!,
+                          _emergencyNameController,
+                          validator: (v) =>
+                              _validateRequired(v, lang['required']!),
+                        ),
+                        _buildDropdown(
+                          lang['relationship']!,
+                          relationOptions,
+                          _selectedRelationship,
+                          (v) => setState(() => _selectedRelationship = v),
+                          required: true,
+                          requiredError: lang['select_required'],
+                        ),
+                        _buildDropdown(
+                          lang['gender']!,
+                          genderOptions,
+                          _emergencyGender,
+                          (v) => setState(() => _emergencyGender = v),
+                          required: true,
+                          requiredError: lang['select_required'],
+                        ),
+                        _buildTextField(
+                          lang['phone']!,
+                          _emergencyPhoneController,
+                          type: TextInputType.phone,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                                RegExp(r'[\d\+\-\s]')),
+                          ],
+                          validator: (v) => _validatePhone(
+                              v, lang['required']!, lang['invalid_phone']!),
+                        ),
+                        _buildTextField(
+                          lang['email']!,
+                          _emergencyEmailController,
+                          type: TextInputType.emailAddress,
+                          validator: (v) => _validateEmail(
+                              v, lang['required']!, lang['invalid_email']!),
+                        ),
+                        _buildTextField(
+                          lang['address']!,
+                          _emergencyAddressController,
+                          validator: (v) =>
+                              _validateRequired(v, lang['required']!),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 32),
+
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 2,
+                  ),
+                  onPressed: _handleSubmit,
+                  child: Text(lang['submit']!,
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold)),
+                ),
+                const SizedBox(height: 40),
+              ],
+            ),
           ),
         ),
       ),

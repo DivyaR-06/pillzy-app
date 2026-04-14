@@ -1,23 +1,25 @@
 import 'package:flutter/material.dart';
-import 'screens/language_screen.dart';
+import 'screens/splash_screen.dart';
 
 void main() {
-  runApp(const MedAlertApp());
+  runApp(const MyApp());
 }
 
-class MedAlertApp extends StatelessWidget {
-  const MedAlertApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Pillzy',
-      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
         useMaterial3: true,
       ),
-      home: const LanguageScreen(),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const SplashScreen(),
+      },
     );
   }
 }

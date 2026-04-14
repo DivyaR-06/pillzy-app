@@ -188,68 +188,71 @@ class _MedicineDetailsScreenState extends State<MedicineDetailsScreen> {
 
   // ── Build time slots based on selected frequency ─────────────────────────────
   void _updateTimeSlots(String freqKey, Map<String, String> lang) {
-    List<_TimeSlot> slots = [];
+  List<_TimeSlot> slots = [];
 
-    if (freqKey == 'once') {
-      // Once a day → Morning with preset 8:00 AM
-      slots = [
-        _TimeSlot(
-          label: lang['morning']!,
-          icon: Icons.wb_sunny_rounded,
-          color: const Color(0xFFF59E0B),
-          preset: const TimeOfDay(hour: 8, minute: 0),
-        ),
-      ];
-    } else if (freqKey == 'twice') {
-      // Twice a day → Morning & Night
-      slots = [
-        _TimeSlot(
-          label: lang['morning']!,
-          icon: Icons.wb_sunny_rounded,
-          color: const Color(0xFFF59E0B),
-          preset: const TimeOfDay(hour: 8, minute: 0),
-        ),
-        _TimeSlot(
-          label: lang['night']!,
-          icon: Icons.nightlight_round,
-          color: const Color(0xFF6366F1),
-          preset: const TimeOfDay(hour: 21, minute: 0),
-        ),
-      ];
-    } else if (freqKey == 'thrice') {
-      // Three times → Morning, Afternoon, Night
-      slots = [
-        _TimeSlot(
-          label: lang['morning']!,
-          icon: Icons.wb_sunny_rounded,
-          color: const Color(0xFFF59E0B),
-          preset: const TimeOfDay(hour: 8, minute: 0),
-        ),
-        _TimeSlot(
-          label: lang['afternoon']!,
-          icon: Icons.wb_cloudy_rounded,
-          color: const Color(0xFF10B981),
-          preset: const TimeOfDay(hour: 13, minute: 0),
-        ),
-        _TimeSlot(
-          label: lang['night']!,
-          icon: Icons.nightlight_round,
-          color: const Color(0xFF6366F1),
-          preset: const TimeOfDay(hour: 21, minute: 0),
-        ),
-      ];
-    } else {
-      // As needed → no fixed schedule
-      slots = [];
-    }
-
-    // Pre-fill preset times
-    for (final s in slots) {
-      s.selected = s.preset;
-    }
-
-    setState(() => _timeSlots = slots);
+  if (freqKey == 'once') {
+    // Once → single flexible time
+    slots = [
+      _TimeSlot(
+        label: lang['time1']!,
+        icon: Icons.access_time_rounded,
+        color: const Color(0xFF2D7DD2),
+        preset: TimeOfDay.now(),
+      ),
+    ];
+  } 
+  else if (freqKey == 'twice') {
+    // Twice → user chooses ANY 2 times
+    slots = [
+      _TimeSlot(
+        label: lang['time1']!,
+        icon: Icons.access_time_rounded,
+        color: const Color(0xFF2D7DD2),
+        preset: TimeOfDay.now(),
+      ),
+      _TimeSlot(
+        label: lang['time2']!,
+        icon: Icons.access_time_rounded,
+        color: const Color(0xFF10B981),
+        preset: TimeOfDay.now(),
+      ),
+    ];
+  } 
+  else if (freqKey == 'thrice') {
+    // Three times → 3 flexible times
+    slots = [
+      _TimeSlot(
+        label: lang['time1']!,
+        icon: Icons.access_time_rounded,
+        color: const Color(0xFF2D7DD2),
+        preset: TimeOfDay.now(),
+      ),
+      _TimeSlot(
+        label: lang['time2']!,
+        icon: Icons.access_time_rounded,
+        color: const Color(0xFF10B981),
+        preset: TimeOfDay.now(),
+      ),
+      _TimeSlot(
+        label: lang['night']!,
+        icon: Icons.access_time_rounded,
+        color: const Color(0xFF6366F1),
+        preset: TimeOfDay.now(),
+      ),
+    ];
+  } 
+  else {
+    // As needed → no schedule
+    slots = [];
   }
+
+  // Pre-fill times
+  for (final s in slots) {
+    s.selected = s.preset;
+  }
+
+  setState(() => _timeSlots = slots);
+}
 
   // ── Photo picker ──────────────────────────────────────────────────────────────
   Future<void> _pickPhoto() async {
