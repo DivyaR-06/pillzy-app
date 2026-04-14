@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'profile_screen.dart';
 import 'medicine_details_screen.dart';
+import '/main.dart'; // for navigating back to language/splash screen on logout
 
 class HomeScreen extends StatefulWidget {
   final Map<String, dynamic> profileData;
@@ -15,7 +16,6 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   final List<Map<String, dynamic>> _medicines = [];
 
-  // ✅ await and context live here — inside an async method of a State class
   Future<void> _openMedicineScreen() async {
     final langCode = widget.profileData['languageCode'] as String? ?? 'en';
     final result = await Navigator.push(
@@ -26,6 +26,42 @@ class _HomeScreenState extends State<HomeScreen> {
     );
     if (result != null) {
       setState(() => _medicines.add(Map<String, dynamic>.from(result)));
+    }
+  }
+
+  // ── Logout confirmation dialog ──────────────────────────────────────────────
+  Future<void> _confirmLogout(Map<String, String> lang) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(children: [
+          const Icon(Icons.logout_rounded, color: Colors.redAccent),
+          const SizedBox(width: 10),
+          Text(lang['logout']!),
+        ]),
+        content: Text(lang['logout_confirm']!),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(lang['cancel']!, style: const TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(lang['logout']!),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      // Navigate back to the very first screen (language / splash)
+      Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
     }
   }
 
@@ -40,6 +76,9 @@ class _HomeScreenState extends State<HomeScreen> {
       'shop_title': 'Med Shop',
       'shop_sub': 'Browse and order medications.',
       'add_med': 'Add Medicine',
+      'logout': 'Logout',
+      'logout_confirm': 'Are you sure you want to logout?',
+      'cancel': 'Cancel',
     },
     'ta': {
       'home': 'முகப்பு', 'profile': 'சுயவிவரம்', 'progress': 'முன்னேற்றம்', 'shop': 'கடை',
@@ -51,6 +90,9 @@ class _HomeScreenState extends State<HomeScreen> {
       'shop_title': 'மருந்து கடை',
       'shop_sub': 'மருந்துகளை உலாவி ஆர்டர் செய்யுங்கள்.',
       'add_med': 'மருந்து சேர்',
+      'logout': 'வெளியேறு',
+      'logout_confirm': 'நீங்கள் வெளியேற விரும்புகிறீர்களா?',
+      'cancel': 'ரத்து செய்',
     },
     'hi': {
       'home': 'होम', 'profile': 'प्रोफ़ाइल', 'progress': 'प्रगति', 'shop': 'शॉप',
@@ -62,6 +104,9 @@ class _HomeScreenState extends State<HomeScreen> {
       'shop_title': 'मेड शॉप',
       'shop_sub': 'दवाइयाँ ब्राउज़ करें और ऑर्डर करें।',
       'add_med': 'दवा जोड़ें',
+      'logout': 'लॉगआउट',
+      'logout_confirm': 'क्या आप वाकई लॉगआउट करना चाहते हैं?',
+      'cancel': 'रद्द करें',
     },
     'te': {
       'home': 'హోమ్', 'profile': 'ప్రొఫైల్', 'progress': 'పురోగతి', 'shop': 'షాప్',
@@ -73,6 +118,9 @@ class _HomeScreenState extends State<HomeScreen> {
       'shop_title': 'మెడ్ షాప్',
       'shop_sub': 'మందులను బ్రౌజ్ చేసి ఆర్డర్ చేయండి.',
       'add_med': 'మందు జోడించు',
+      'logout': 'లాగ్అవుట్',
+      'logout_confirm': 'మీరు నిజంగా లాగ్అవుట్ చేయాలనుకుంటున్నారా?',
+      'cancel': 'రద్దు చేయి',
     },
     'bn': {
       'home': 'হোম', 'profile': 'প্রোফাইল', 'progress': 'অগ্রগতি', 'shop': 'শপ',
@@ -84,6 +132,9 @@ class _HomeScreenState extends State<HomeScreen> {
       'shop_title': 'মেড শপ',
       'shop_sub': 'ওষুধ ব্রাউজ করুন এবং অর্ডার করুন।',
       'add_med': 'ওষুধ যোগ করুন',
+      'logout': 'লগআউট',
+      'logout_confirm': 'আপনি কি সত্যিই লগআউট করতে চান?',
+      'cancel': 'বাতিল',
     },
     'mr': {
       'home': 'होम', 'profile': 'प्रोफाइल', 'progress': 'प्रगती', 'shop': 'शॉप',
@@ -95,6 +146,9 @@ class _HomeScreenState extends State<HomeScreen> {
       'shop_title': 'मेड शॉप',
       'shop_sub': 'औषधे ब्राउझ करा आणि ऑर्डर करा.',
       'add_med': 'औषध जोडा',
+      'logout': 'लॉगआउट',
+      'logout_confirm': 'तुम्हाला खरोखर लॉगआउट करायचे आहे का?',
+      'cancel': 'रद्द करा',
     },
   };
 
@@ -119,25 +173,30 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.teal,
-        title: const Text('Pillzy', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: const Text('Pillzy',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         actions: [
           if (name.isNotEmpty)
             GestureDetector(
               onTap: () => setState(() => _selectedIndex = 1),
               child: Padding(
-                padding: const EdgeInsets.only(right: 16),
+                padding: const EdgeInsets.only(right: 8),
                 child: Row(
                   children: [
                     const Icon(Icons.person_rounded, color: Colors.white),
                     const SizedBox(width: 6),
-                    Text(
-                      name.split(' ').first,
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-                    ),
+                    Text(name.split(' ').first,
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
                   ],
                 ),
               ),
             ),
+          // ── Logout button ──────────────────────────────────────────────────
+          IconButton(
+            tooltip: lang['logout'],
+            icon: const Icon(Icons.logout_rounded, color: Colors.white),
+            onPressed: () => _confirmLogout(lang),
+          ),
         ],
       ),
       body: pages[_selectedIndex],
@@ -179,14 +238,14 @@ class _HomeTab extends StatelessWidget {
         children: [
           if (name.isNotEmpty) ...[
             Text('${lang['welcome']!}, $name 👋',
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
             const SizedBox(height: 24),
           ],
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(lang['upcoming']!,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.teal)),
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.teal)),
               TextButton.icon(
                 onPressed: onAddMedicine,
                 icon: const Icon(Icons.add_circle_rounded, size: 18),
@@ -230,6 +289,7 @@ class _HomeTab extends StatelessWidget {
   }
 }
 
+// ── MEDICINE CARD — shows all time slots ──────────────────────────────────────
 class _MedCard extends StatelessWidget {
   final Map<String, dynamic> medicine;
   final String nextDoseLabel;
@@ -238,21 +298,116 @@ class _MedCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final photoPath = medicine['photo'] as String? ?? '';
+    final times = medicine['times'] as List<dynamic>?;
+    final timeString = medicine['time'] as String? ?? '';
+
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: Colors.teal.shade50,
-          backgroundImage: photoPath.isNotEmpty ? FileImage(File(photoPath)) : null,
-          child: photoPath.isEmpty
-              ? const Icon(Icons.medication, color: Colors.teal)
-              : null,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Photo / icon
+            CircleAvatar(
+              radius: 26,
+              backgroundColor: Colors.teal.shade50,
+              backgroundImage: photoPath.isNotEmpty ? FileImage(File(photoPath)) : null,
+              child: photoPath.isEmpty
+                  ? const Icon(Icons.medication, color: Colors.teal, size: 26)
+                  : null,
+            ),
+            const SizedBox(width: 12),
+            // Info
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(medicine['name'] ?? '',
+                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+                  const SizedBox(height: 2),
+                  Text(
+                    '${medicine['dosage'] ?? ''}  •  ${medicine['frequency'] ?? ''}',
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                  ),
+                  const SizedBox(height: 8),
+                  // Time chips
+                  if (times != null && times.isNotEmpty)
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 4,
+                      children: times.map<Widget>((t) {
+                        final parts = (t as String).split(': ');
+                        final slotLabel = parts.length == 2 ? parts[0] : '';
+                        final slotTime = parts.length == 2 ? parts[1] : t;
+                        final color = _slotColor(slotLabel);
+                        return Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: color.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: color.withOpacity(0.4)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(_slotIcon(slotLabel), size: 12, color: color),
+                              const SizedBox(width: 4),
+                              Text(
+                                slotLabel.isNotEmpty ? '$slotLabel · $slotTime' : slotTime,
+                                style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.w600),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    )
+                  else if (timeString.isNotEmpty)
+                    Text('$nextDoseLabel: $timeString',
+                        style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right_rounded, color: Colors.teal),
+          ],
         ),
-        title: Text(medicine['name'] ?? '', style: const TextStyle(fontWeight: FontWeight.w600)),
-        subtitle: Text('${medicine['dosage'] ?? ''}  •  $nextDoseLabel: ${medicine['time'] ?? ''}'),
-        trailing: const Icon(Icons.chevron_right_rounded, color: Colors.teal),
       ),
     );
+  }
+
+  Color _slotColor(String label) {
+    final l = label.toLowerCase();
+    if (l.contains('morning') || l.contains('காலை') || l.contains('सुबह') ||
+        l.contains('ఉదయం') || l.contains('সকাল') || l.contains('सकाळ')) {
+      return const Color(0xFFF59E0B);
+    }
+    if (l.contains('afternoon') || l.contains('மதியம்') || l.contains('दोपहर') ||
+        l.contains('మధ్యాహ్నం') || l.contains('দুপুর') || l.contains('दुपार')) {
+      return const Color(0xFF10B981);
+    }
+    if (l.contains('night') || l.contains('இரவு') || l.contains('रात') ||
+        l.contains('రాత్రి') || l.contains('রাত') || l.contains('रात्र')) {
+      return const Color(0xFF6366F1);
+    }
+    return Colors.teal;
+  }
+
+  IconData _slotIcon(String label) {
+    final l = label.toLowerCase();
+    if (l.contains('morning') || l.contains('காலை') || l.contains('सुबह') ||
+        l.contains('ఉదయం') || l.contains('সকাল') || l.contains('सकाळ')) {
+      return Icons.wb_sunny_rounded;
+    }
+    if (l.contains('afternoon') || l.contains('மதியம்') || l.contains('दोपहर') ||
+        l.contains('మధ్యాహ్నం') || l.contains('দুপুর') || l.contains('दुपार')) {
+      return Icons.wb_cloudy_rounded;
+    }
+    if (l.contains('night') || l.contains('இரவு') || l.contains('रात') ||
+        l.contains('రాత్రి') || l.contains('রাত') || l.contains('रात्र')) {
+      return Icons.nightlight_round;
+    }
+    return Icons.schedule_rounded;
   }
 }
 
